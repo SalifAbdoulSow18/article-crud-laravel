@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Article;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class ArticleController extends Controller
 {
@@ -14,7 +17,8 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        //
+        $articles = Article::all();
+        return view('articles.index', compact('articles'));
     }
 
     /**
@@ -24,18 +28,32 @@ class ArticleController extends Controller
      */
     public function create()
     {
-        //
+        return view('articles.create');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return Application|\Illuminate\Http\RedirectResponse|Response|\Illuminate\Routing\Redirector
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'title' => 'required',
+            'content' => 'required'
+        ];
+        $errorMessage = [
+            'required' => 'le champ :attribute est obligatoire'
+        ];
+        $this->validate($request, $rules, $errorMessage);
+        Article::create([
+            'title' => $request->title,
+            'content' => $request->content
+        ]);
+
+        return redirect(route('articles.index'))->with('success', 'Article saved successfully');
     }
 
     /**
